@@ -584,6 +584,17 @@ html, body {
 }
 .ai-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
+.btn-move {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 15px;
+  cursor: pointer;
+}
+.btn-move:active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+
 .btn-save {
   background: var(--accent);
   color: #fff;

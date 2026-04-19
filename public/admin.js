@@ -44,6 +44,15 @@ async function addItem() {
   }
 }
 
+async function moveItem(id, direction) {
+  await fetch(`/api/items/${id}/move`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ direction }),
+  });
+  await loadItems();
+}
+
 async function deleteItem(id, name) {
   if (!confirm(`Opravdu odebrat "${name}" z menu?`)) return;
   await fetch(`/api/items/${id}`, { method: 'DELETE' });
@@ -113,6 +122,8 @@ function renderItems(items) {
           </select>
         </div>
         <div class="ai-actions">
+          <button class="btn-move" data-id="${item.id}" data-dir="up"   title="Přesunout nahoru">↑</button>
+          <button class="btn-move" data-id="${item.id}" data-dir="down" title="Přesunout dolů">↓</button>
           <button class="btn-save"   data-id="${item.id}">Uložit</button>
           <button class="btn-delete" data-id="${item.id}" data-name="${item.name}">Odebrat</button>
         </div>
@@ -121,6 +132,9 @@ function renderItems(items) {
     }
   }
 
+  list.querySelectorAll('.btn-move').forEach(btn => {
+    btn.addEventListener('click', () => moveItem(btn.dataset.id, btn.dataset.dir));
+  });
   list.querySelectorAll('.btn-save').forEach(btn => {
     btn.addEventListener('click', () => saveEdit(btn.dataset.id));
   });

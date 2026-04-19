@@ -32,6 +32,15 @@ async function init() {
     );
   `);
 
+  // Přidat sort_order pokud sloupec chybí (migrace)
+  await pool.query(`
+    ALTER TABLE items ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0
+  `);
+  // Inicializovat sort_order pro existující položky kde je 0
+  await pool.query(`
+    UPDATE items SET sort_order = id WHERE sort_order = 0
+  `);
+
   // Seed položek pokud je tabulka prázdná
   const { rows } = await pool.query('SELECT COUNT(*) AS c FROM items');
   if (parseInt(rows[0].c) === 0) {
@@ -76,9 +85,28 @@ async function init() {
 // ── Items ─────────────────────────────────────────────────────────────────────
 async function getItems() {
   const { rows } = await pool.query(
-    'SELECT * FROM items WHERE active = true ORDER BY category, name'
+    'SELECT * FROM items WHERE active = true ORDER BY category, sort_order, id'
   );
   return rows;
+}
+
+async function moveItem(id, direction) {
+  // Najdi aktuální položku
+  const { rows: [item] } = await pool.query('SELECT * FROM items WHERE id=$1', [id]);
+  if (!item) return;
+
+  // Najdi sousední položku ve stejné kategorii
+  const op = direction === 'up' ? '<' : '>';
+  const ord = direction === 'up' ? 'DESC' : 'ASC';
+  const { rows: [neighbor] } = await pool.query(
+    `SELECT * FROM items WHERE active=true AND category=$1 AND sort_order ${op} $2 ORDER BY sort_order ${ord} LIMIT 1`,
+    [item.category, item.sort_order]
+  );
+  if (!neighbor) return;
+
+  // Prohoď sort_order
+  await pool.query('UPDATE items SET sort_order=$1 WHERE id=$2', [neighbor.sort_order, item.id]);
+  await pool.query('UPDATE items SET sort_order=$1 WHERE id=$2', [item.sort_order, neighbor.id]);
 }
 
 async function addItem({ name, price, category }) {
@@ -193,4 +221,4 @@ async function getAvailableDates() {
   return rows.map(r => r.date);
 }
 
-module.exports = { init, getItems, addItem, updateItem, deleteItem, upsertOrders, deleteOrder, getSummary, getAvailableDates };
+module.exports = { init, getItems, addItem, updateItem, deleteItem, moveItem, upsertOrders, deleteOrder, getSummary, getAvailableDates };
