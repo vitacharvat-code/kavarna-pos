@@ -107,7 +107,7 @@ function renderOrders(orders) {
   section.querySelectorAll('.btn-delete-order').forEach(btn => {
     btn.addEventListener('click', async () => {
       try {
-        await askPin();
+        await askPin({ force: true });
         const res = await fetch(`/api/orders/${btn.dataset.id}`, { method: 'DELETE' });
         if (res.ok) loadSummary();
       } catch {

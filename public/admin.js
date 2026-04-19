@@ -99,7 +99,8 @@ function renderItems(items) {
     for (const item of catItems) {
       const row = document.createElement('div');
       row.className = 'admin-item-row';
-      row.dataset.id = item.id;
+      row.dataset.id  = item.id;
+      row.dataset.cat = item.category;
       row.innerHTML = `
         <div class="ai-fields">
           <input class="edit-name" value="${item.name}" placeholder="Název">

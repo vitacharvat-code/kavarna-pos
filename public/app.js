@@ -147,6 +147,7 @@ function renderItems() {
   for (const item of filtered) {
     const btn = document.createElement('button');
     btn.className = 'item-btn';
+    btn.dataset.category = item.category;
     btn.innerHTML = `
       <span class="item-name">${item.name}</span>
       <span class="item-price">${fmt(item.price)}</span>
