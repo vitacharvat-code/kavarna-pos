@@ -78,20 +78,24 @@ app.get('/api/backup', async (req, res) => {
   try {
     const rows = await db.getBackupData();
 
+    // Celkem a metadata zobrazit jen na prvním řádku každé objednávky
+    const seen = new Set();
     const lines = [
       'Č. objednávky;Datum;Čas;Způsob platby;Položka;Množství;Cena za kus (Kč);Mezisoučet (Kč);Celkem objednávka (Kč)',
       ...rows.map(r => {
-        const dt = new Date(r.created_at);
+        const dt       = new Date(r.created_at);
+        const isFirst  = !seen.has(r.order_number);
+        if (isFirst) seen.add(r.order_number);
         return [
           r.order_number,
-          dt.toLocaleDateString('cs-CZ'),
-          dt.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }),
-          r.payment_method === 'hotovost' ? 'Hotovost' : 'Na účet',
+          isFirst ? dt.toLocaleDateString('cs-CZ') : '',
+          isFirst ? dt.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }) : '',
+          isFirst ? (r.payment_method === 'hotovost' ? 'Hotovost' : 'Na účet') : '',
           r.item_name,
           r.quantity,
           r.item_price.toFixed(2).replace('.', ','),
           r.subtotal.toFixed(2).replace('.', ','),
-          r.total.toFixed(2).replace('.', ','),
+          isFirst ? r.total.toFixed(2).replace('.', ',') : '',
         ].join(';');
       })
     ];
