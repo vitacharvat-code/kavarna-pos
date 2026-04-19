@@ -211,6 +211,7 @@ async function getSummary(date) {
 async function getBackupData() {
   const { rows } = await pool.query(`
     SELECT
+      ROW_NUMBER() OVER (ORDER BY o.created_at ASC, o.id ASC) AS order_number,
       o.created_at,
       o.payment_method,
       o.total,
@@ -220,7 +221,7 @@ async function getBackupData() {
       (oi.item_price * oi.quantity) AS subtotal
     FROM orders o
     JOIN order_items oi ON oi.order_id = o.id
-    ORDER BY o.created_at DESC, o.id
+    ORDER BY o.created_at ASC, o.id ASC, oi.id ASC
   `);
   return rows;
 }

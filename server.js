@@ -79,16 +79,21 @@ app.get('/api/backup', async (req, res) => {
     const rows = await db.getBackupData();
 
     const lines = [
-      'Datum a čas;Způsob platby;Celkem objednávka;Položka;Cena za kus;Množství;Mezisoučet',
-      ...rows.map(r => [
-        new Date(r.created_at).toLocaleString('cs-CZ'),
-        r.payment_method === 'hotovost' ? 'Hotovost' : 'Na účet',
-        r.total.toFixed(2).replace('.', ','),
-        r.item_name,
-        r.item_price.toFixed(2).replace('.', ','),
-        r.quantity,
-        r.subtotal.toFixed(2).replace('.', ','),
-      ].join(';'))
+      'Č. objednávky;Datum;Čas;Způsob platby;Položka;Množství;Cena za kus (Kč);Mezisoučet (Kč);Celkem objednávka (Kč)',
+      ...rows.map(r => {
+        const dt = new Date(r.created_at);
+        return [
+          r.order_number,
+          dt.toLocaleDateString('cs-CZ'),
+          dt.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }),
+          r.payment_method === 'hotovost' ? 'Hotovost' : 'Na účet',
+          r.item_name,
+          r.quantity,
+          r.item_price.toFixed(2).replace('.', ','),
+          r.subtotal.toFixed(2).replace('.', ','),
+          r.total.toFixed(2).replace('.', ','),
+        ].join(';');
+      })
     ];
 
     const date = new Date().toISOString().slice(0, 10);
