@@ -76,19 +76,7 @@ app.get('/api/dates', async (req, res) => {
 // ── Záloha ────────────────────────────────────────────────────────────────────
 app.get('/api/backup', async (req, res) => {
   try {
-    const { rows } = await pool.query(`
-      SELECT
-        o.created_at,
-        o.payment_method,
-        o.total,
-        oi.item_name,
-        oi.item_price,
-        oi.quantity,
-        (oi.item_price * oi.quantity) AS subtotal
-      FROM orders o
-      JOIN order_items oi ON oi.order_id = o.id
-      ORDER BY o.created_at DESC, o.id
-    `);
+    const rows = await db.getBackupData();
 
     const lines = [
       'Datum a čas;Způsob platby;Celkem objednávka;Položka;Cena za kus;Množství;Mezisoučet',

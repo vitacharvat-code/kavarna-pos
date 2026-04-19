@@ -208,6 +208,23 @@ async function getSummary(date) {
   return { date, totals: totals[0], itemStats, orders: ordersWithItems };
 }
 
+async function getBackupData() {
+  const { rows } = await pool.query(`
+    SELECT
+      o.created_at,
+      o.payment_method,
+      o.total,
+      oi.item_name,
+      oi.item_price,
+      oi.quantity,
+      (oi.item_price * oi.quantity) AS subtotal
+    FROM orders o
+    JOIN order_items oi ON oi.order_id = o.id
+    ORDER BY o.created_at DESC, o.id
+  `);
+  return rows;
+}
+
 async function deleteOrder(id) {
   await pool.query('DELETE FROM order_items WHERE order_id=$1', [id]);
   await pool.query('DELETE FROM orders WHERE id=$1', [id]);
@@ -221,4 +238,4 @@ async function getAvailableDates() {
   return rows.map(r => r.date);
 }
 
-module.exports = { init, getItems, addItem, updateItem, deleteItem, moveItem, upsertOrders, deleteOrder, getSummary, getAvailableDates };
+module.exports = { init, getItems, addItem, updateItem, deleteItem, moveItem, upsertOrders, deleteOrder, getBackupData, getSummary, getAvailableDates };
