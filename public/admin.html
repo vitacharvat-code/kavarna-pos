@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Kavárna — Správa</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="admin-layout">
+  <div class="admin-header">
+    <h1>Správa položek</h1>
+  </div>
+
+  <div class="admin-form">
+    <h2>Přidat novou položku</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Název</label>
+        <input type="text" id="newName" placeholder="Cappuccino">
+      </div>
+      <div class="form-group">
+        <label>Cena (Kč)</label>
+        <input type="number" id="newPrice" placeholder="65" min="1" step="1">
+      </div>
+      <div class="form-group">
+        <label>Kategorie</label>
+        <select id="newCategory">
+          <option value="kava">Káva</option>
+          <option value="napoje">Nápoje</option>
+          <option value="jidlo">Jídlo</option>
+          <option value="ostatni">Ostatní</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-add" id="btnAdd">Přidat položku</button>
+    <div id="formMsg" style="margin-top:10px;font-size:14px;color:#4caf50;display:none;"></div>
+  </div>
+
+  <div class="section-title">Aktuální menu</div>
+  <div class="admin-items-list" id="itemsList">
+    <div class="no-data">Načítám...</div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="/" class="nav-item">
+    <span class="nav-icon">☕</span>
+    <span>Pokladna</span>
+  </a>
+  <a href="/dashboard.html" class="nav-item">
+    <span class="nav-icon">📊</span>
+    <span>Přehled</span>
+  </a>
+  <a href="/admin.html" class="nav-item active">
+    <span class="nav-icon">⚙️</span>
+    <span>Správa</span>
+  </a>
+</nav>
+
+<script src="admin.js"></script>
+</body>
+</html>

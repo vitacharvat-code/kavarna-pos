@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kavárna">
+  <meta name="theme-color" content="#1a1a1a">
+  <link rel="manifest" href="/manifest.json">
+  <title>Kavárna — Pokladna</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- Levý panel: menu -->
+  <div class="menu-panel">
+    <div class="menu-header">
+      <div class="menu-topbar">
+        <div class="tab-bar" id="tabBar"></div>
+        <div class="status-bar">
+          <span class="online-dot" id="onlineDot" data-online="true" title="Online"></span>
+          <span class="sync-badge" id="syncBadge" style="display:none"></span>
+        </div>
+      </div>
+    </div>
+    <div class="items-grid" id="itemsGrid"></div>
+  </div>
+
+  <!-- Pravý panel: objednávka -->
+  <div class="order-panel">
+    <div class="order-header">
+      <h2>Objednávka</h2>
+      <button class="btn-clear" id="btnClear">Smazat vše</button>
+    </div>
+
+    <div class="order-list" id="orderList">
+      <div class="order-empty">Zatím žádné položky</div>
+    </div>
+
+    <div class="order-footer">
+      <div class="total-row">
+        <span>Celkem</span>
+        <span class="total-amount" id="totalAmount">0 Kč</span>
+      </div>
+      <div class="payment-btns">
+        <button class="btn-payment btn-cash" id="btnCash" disabled>
+          <span class="pay-icon">💵</span>
+          <span class="pay-label">Hotovost</span>
+        </button>
+        <button class="btn-payment btn-card" id="btnCard" disabled>
+          <span class="pay-icon">🏦</span>
+          <span class="pay-label">Na účet</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Navigace dole -->
+<nav class="bottom-nav">
+  <a href="/" class="nav-item active">
+    <span class="nav-icon">☕</span>
+    <span>Pokladna</span>
+  </a>
+  <a href="/dashboard.html" class="nav-item">
+    <span class="nav-icon">📊</span>
+    <span>Přehled</span>
+  </a>
+  <a href="/admin.html" class="nav-item">
+    <span class="nav-icon">⚙️</span>
+    <span>Správa</span>
+  </a>
+</nav>
+
+<!-- Modal potvrzení -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-icon" id="modalIcon"></div>
+    <h3 id="modalTitle"></h3>
+    <p id="modalText"></p>
+    <button class="btn-modal-ok" id="modalOk">OK</button>
+  </div>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
