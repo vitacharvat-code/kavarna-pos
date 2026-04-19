@@ -162,7 +162,22 @@ async function getSummary(date) {
     SELECT * FROM orders WHERE created_at::date=$1 ORDER BY created_at DESC
   `, [date]);
 
-  return { date, totals: totals[0], itemStats, orders };
+  // Přidat položky ke každé objednávce
+  const { rows: allOrderItems } = await pool.query(`
+    SELECT order_id, item_name AS name, item_price AS price, quantity
+    FROM order_items oi
+    JOIN orders o ON o.id = oi.order_id
+    WHERE o.created_at::date = $1
+  `, [date]);
+
+  const itemsByOrder = {};
+  for (const item of allOrderItems) {
+    if (!itemsByOrder[item.order_id]) itemsByOrder[item.order_id] = [];
+    itemsByOrder[item.order_id].push(item);
+  }
+  const ordersWithItems = orders.map(o => ({ ...o, items: itemsByOrder[o.id] || [] }));
+
+  return { date, totals: totals[0], itemStats, orders: ordersWithItems };
 }
 
 async function getAvailableDates() {

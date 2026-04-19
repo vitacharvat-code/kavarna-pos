@@ -388,6 +388,57 @@ html, body {
 
 .no-data { text-align: center; color: var(--text-muted); padding: 60px 20px; font-size: 16px; }
 
+/* ── Seznam objednávek ────────────────────────────────────────────────────── */
+.order-summary-row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.osr-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 0.12s;
+  -webkit-user-select: none;
+}
+.osr-main:active { background: var(--surface2); }
+
+.osr-time    { font-size: 15px; font-weight: 700; min-width: 44px; color: var(--text-muted); }
+.osr-items   { flex: 1; font-size: 14px; color: var(--text-muted); }
+.osr-pay     { font-size: 13px; color: var(--text-muted); white-space: nowrap; }
+.osr-total   { font-size: 17px; font-weight: 800; color: var(--accent); white-space: nowrap; }
+.osr-chevron {
+  font-size: 20px;
+  color: var(--text-muted);
+  transition: transform 0.2s;
+  line-height: 1;
+  margin-left: 4px;
+}
+
+.osr-detail {
+  display: none;
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  background: var(--surface2);
+}
+.osr-detail.open { display: block; }
+
+.detail-table { width: 100%; border-collapse: collapse; }
+.detail-table td {
+  padding: 7px 8px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.detail-table tr:last-child td { border-bottom: none; }
+.detail-table .dt-qty          { color: var(--text-muted); text-align: center; width: 36px; }
+.detail-table .dt-price        { text-align: right; font-weight: 600; white-space: nowrap; }
+.detail-table .dt-total-row td { font-weight: 800; color: var(--accent); padding-top: 10px; }
+
 /* ── Admin ────────────────────────────────────────────────────────────────── */
 .admin-layout {
   padding: 20px 20px calc(var(--nav-h) + 20px);

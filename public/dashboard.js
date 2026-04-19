@@ -1,6 +1,5 @@
 let currentDate = today();
-let refreshTimer = null;
-const REFRESH_INTERVAL = 30_000; // 30 sekund
+const REFRESH_INTERVAL = 30_000;
 
 async function init() {
   const picker = document.getElementById('datePicker');
@@ -12,7 +11,9 @@ async function init() {
   });
 
   await loadSummary();
-  startAutoRefresh();
+  setInterval(() => {
+    if (document.getElementById('datePicker').value === today()) loadSummary();
+  }, REFRESH_INTERVAL);
 }
 
 // ── Načtení dat ───────────────────────────────────────────────────────────────
@@ -21,32 +22,20 @@ async function loadSummary() {
     const res  = await fetch(`/api/summary?date=${currentDate}`);
     const data = await res.json();
     renderStats(data.totals);
-    renderItems(data.itemStats);
+    renderOrders(data.orders);
     updateRefreshInfo();
   } catch {
-    document.getElementById('itemsSection').innerHTML =
+    document.getElementById('ordersSection').innerHTML =
       '<div class="no-data">Nepodařilo se načíst data — zkontroluj připojení.</div>';
   }
 }
 
-// ── Auto-refresh ──────────────────────────────────────────────────────────────
-function startAutoRefresh() {
-  // Refresh pouze pro dnešní den (historická data se nemění)
-  refreshTimer = setInterval(() => {
-    if (document.getElementById('datePicker').value === today()) {
-      loadSummary();
-    }
-  }, REFRESH_INTERVAL);
-}
-
 function updateRefreshInfo() {
   const el = document.getElementById('refreshInfo');
-  if (!el) return;
-  const now = new Date();
-  el.textContent = `Aktualizováno ${now.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+  if (el) el.textContent = `Aktualizováno ${new Date().toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
 }
 
-// ── Render ────────────────────────────────────────────────────────────────────
+// ── Render stats ──────────────────────────────────────────────────────────────
 function renderStats(t) {
   document.getElementById('statOrders').textContent = t?.order_count ?? 0;
   document.getElementById('statTotal').textContent  = fmt(t?.total_revenue ?? 0);
@@ -54,27 +43,62 @@ function renderStats(t) {
   document.getElementById('statCard').textContent   = fmt(t?.card ?? 0);
 }
 
-function renderItems(items) {
-  const section = document.getElementById('itemsSection');
-  if (!items?.length) {
-    section.innerHTML = '<div class="no-data">Žádné prodeje za tento den.</div>';
+// ── Render objednávek ─────────────────────────────────────────────────────────
+function renderOrders(orders) {
+  const section = document.getElementById('ordersSection');
+
+  if (!orders?.length) {
+    section.innerHTML = '<div class="no-data">Žádné objednávky za tento den.</div>';
     return;
   }
-  section.innerHTML = `
-    <table class="items-table">
-      <thead>
-        <tr><th>Položka</th><th>Kusů</th><th>Tržba</th></tr>
-      </thead>
-      <tbody>
-        ${items.map(i => `
-          <tr>
-            <td>${i.name}</td>
-            <td class="td-qty">${i.quantity}×</td>
-            <td class="td-revenue">${fmt(i.revenue)}</td>
-          </tr>`).join('')}
-      </tbody>
-    </table>
-  `;
+
+  section.innerHTML = '';
+
+  orders.forEach((order, idx) => {
+    const time        = new Date(order.created_at).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+    const itemCount   = order.items.reduce((s, i) => s + i.quantity, 0);
+    const payIcon     = order.payment_method === 'hotovost' ? '💵' : '🏦';
+    const payLabel    = order.payment_method === 'hotovost' ? 'Hotovost' : 'Na účet';
+    const detailId    = `order-detail-${idx}`;
+
+    const row = document.createElement('div');
+    row.className = 'order-summary-row';
+    row.innerHTML = `
+      <div class="osr-main" data-target="${detailId}">
+        <span class="osr-time">${time}</span>
+        <span class="osr-items">${itemCount} ${itemCount === 1 ? 'položka' : itemCount < 5 ? 'položky' : 'položek'}</span>
+        <span class="osr-pay">${payIcon} ${payLabel}</span>
+        <span class="osr-total">${fmt(order.total)}</span>
+        <span class="osr-chevron">›</span>
+      </div>
+      <div class="osr-detail" id="${detailId}">
+        <table class="detail-table">
+          ${order.items.map(i => `
+            <tr>
+              <td>${i.name}</td>
+              <td class="dt-qty">${i.quantity}×</td>
+              <td class="dt-price">${fmt(i.price * i.quantity)}</td>
+            </tr>
+          `).join('')}
+          <tr class="dt-total-row">
+            <td colspan="2">Celkem</td>
+            <td class="dt-price">${fmt(order.total)}</td>
+          </tr>
+        </table>
+      </div>
+    `;
+    section.appendChild(row);
+  });
+
+  // Kliknutí — rozbalení/sbalení
+  section.querySelectorAll('.osr-main').forEach(el => {
+    el.addEventListener('click', () => {
+      const detail  = document.getElementById(el.dataset.target);
+      const chevron = el.querySelector('.osr-chevron');
+      const open    = detail.classList.toggle('open');
+      chevron.style.transform = open ? 'rotate(90deg)' : '';
+    });
+  });
 }
 
 // ── Utils ─────────────────────────────────────────────────────────────────────
