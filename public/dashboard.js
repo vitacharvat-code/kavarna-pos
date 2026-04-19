@@ -1,3 +1,5 @@
+import { askPin } from './pin.js';
+
 let currentDate = today();
 const REFRESH_INTERVAL = 30_000;
 
@@ -85,18 +87,32 @@ function renderOrders(orders) {
             <td class="dt-price">${fmt(order.total)}</td>
           </tr>
         </table>
+        <button class="btn-delete-order" data-id="${order.id}">Smazat objednávku</button>
       </div>
     `;
     section.appendChild(row);
   });
 
-  // Kliknutí — rozbalení/sbalení
+  // Rozbalení/sbalení
   section.querySelectorAll('.osr-main').forEach(el => {
     el.addEventListener('click', () => {
       const detail  = document.getElementById(el.dataset.target);
       const chevron = el.querySelector('.osr-chevron');
       const open    = detail.classList.toggle('open');
       chevron.style.transform = open ? 'rotate(90deg)' : '';
+    });
+  });
+
+  // Smazání objednávky — vyžaduje PIN
+  section.querySelectorAll('.btn-delete-order').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      try {
+        await askPin();
+        const res = await fetch(`/api/orders/${btn.dataset.id}`, { method: 'DELETE' });
+        if (res.ok) loadSummary();
+      } catch {
+        // PIN zrušen — nic nedělat
+      }
     });
   });
 }

@@ -2,7 +2,7 @@
 // Vždy zkusí stáhnout aktuální verzi, cache slouží jen jako offline záloha
 
 const CACHE = 'kavarna-v2';
-const SHELL = ['/', '/index.html', '/dashboard.html', '/admin.html', '/style.css', '/app.js', '/dashboard.js', '/admin.js', '/localdb.js'];
+const SHELL = ['/', '/index.html', '/dashboard.html', '/admin.html', '/style.css', '/app.js', '/dashboard.js', '/admin.js', '/localdb.js', '/pin.js'];
 
 self.addEventListener('install', e => {
   e.waitUntil(

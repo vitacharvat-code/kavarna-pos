@@ -439,6 +439,21 @@ html, body {
 .detail-table .dt-price        { text-align: right; font-weight: 600; white-space: nowrap; }
 .detail-table .dt-total-row td { font-weight: 800; color: var(--accent); padding-top: 10px; }
 
+.btn-delete-order {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  background: none;
+  border: 1.5px solid var(--danger);
+  color: var(--danger);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-delete-order:active { opacity: 0.6; }
+
 /* ── Admin ────────────────────────────────────────────────────────────────── */
 .admin-layout {
   padding: 20px 20px calc(var(--nav-h) + 20px);
@@ -556,6 +571,88 @@ html, body {
   font-size: 13px;
   cursor: pointer;
 }
+
+/* ── PIN modal ────────────────────────────────────────────────────────────── */
+.pin-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+}
+.pin-modal {
+  background: var(--surface2);
+  border-radius: 24px;
+  padding: 32px 28px 24px;
+  text-align: center;
+  width: 300px;
+}
+.pin-icon { font-size: 36px; margin-bottom: 10px; }
+.pin-modal h3 { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+
+.pin-dots {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.pin-dots span {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pin-dots span.filled {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.pin-error {
+  min-height: 20px;
+  font-size: 13px;
+  color: var(--danger);
+  margin-bottom: 16px;
+}
+
+.pin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.pin-key {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.pin-key:active    { background: var(--surface2); }
+.pin-key[data-key=""] { visibility: hidden; cursor: default; }
+.pin-key[data-key="⌫"] { font-size: 18px; color: var(--text-muted); }
+
+.pin-cancel {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 15px;
+  cursor: pointer;
+  padding: 8px 20px;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60%  { transform: translateX(-8px); }
+  40%, 80%  { transform: translateX(8px); }
+}
+.pin-modal.shake { animation: shake 0.4s ease; }
 
 /* ── Scrollbars ───────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }

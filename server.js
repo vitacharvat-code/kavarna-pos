@@ -35,6 +35,11 @@ app.delete('/api/items/:id', async (req, res) => {
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.delete('/api/orders/:id', async (req, res) => {
+  try { await db.deleteOrder(req.params.id); res.json({ ok: true }); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── Sync objednávek z iPadu ───────────────────────────────────────────────────
 // iPad posílá pole objednávek (UUID id); server ignoruje duplikáty
 app.post('/api/sync', async (req, res) => {

@@ -1,5 +1,14 @@
+import { askPin } from './pin.js';
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
+  try {
+    await askPin();
+  } catch {
+    // PIN zrušen — vrátit zpět na pokladnu
+    window.location.href = '/';
+    return;
+  }
   await loadItems();
   document.getElementById('btnAdd').addEventListener('click', addItem);
 }

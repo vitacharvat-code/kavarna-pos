@@ -180,6 +180,11 @@ async function getSummary(date) {
   return { date, totals: totals[0], itemStats, orders: ordersWithItems };
 }
 
+async function deleteOrder(id) {
+  await pool.query('DELETE FROM order_items WHERE order_id=$1', [id]);
+  await pool.query('DELETE FROM orders WHERE id=$1', [id]);
+}
+
 async function getAvailableDates() {
   const { rows } = await pool.query(`
     SELECT DISTINCT created_at::date::text AS date
@@ -188,4 +193,4 @@ async function getAvailableDates() {
   return rows.map(r => r.date);
 }
 
-module.exports = { init, getItems, addItem, updateItem, deleteItem, upsertOrders, getSummary, getAvailableDates };
+module.exports = { init, getItems, addItem, updateItem, deleteItem, upsertOrders, deleteOrder, getSummary, getAvailableDates };
