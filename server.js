@@ -73,6 +73,45 @@ app.get('/api/dates', async (req, res) => {
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── Záloha ────────────────────────────────────────────────────────────────────
+app.get('/api/backup', async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        o.created_at,
+        o.payment_method,
+        o.total,
+        oi.item_name,
+        oi.item_price,
+        oi.quantity,
+        (oi.item_price * oi.quantity) AS subtotal
+      FROM orders o
+      JOIN order_items oi ON oi.order_id = o.id
+      ORDER BY o.created_at DESC, o.id
+    `);
+
+    const lines = [
+      'Datum a čas;Způsob platby;Celkem objednávka;Položka;Cena za kus;Množství;Mezisoučet',
+      ...rows.map(r => [
+        new Date(r.created_at).toLocaleString('cs-CZ'),
+        r.payment_method === 'hotovost' ? 'Hotovost' : 'Na účet',
+        r.total.toFixed(2).replace('.', ','),
+        r.item_name,
+        r.item_price.toFixed(2).replace('.', ','),
+        r.quantity,
+        r.subtotal.toFixed(2).replace('.', ','),
+      ].join(';'))
+    ];
+
+    const date = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="kavarna-zaloha-${date}.csv"`);
+    res.send('\uFEFF' + lines.join('\r\n')); // BOM pro správné zobrazení v Excelu
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => res.json({ ok: true, time: new Date().toISOString() }));
 
