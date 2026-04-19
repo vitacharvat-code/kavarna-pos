@@ -45,11 +45,11 @@ function setupSync() {
 
 async function syncPending() {
   if (isSyncing) return;
+  const pending = getUnsynced();
+  if (!pending.length) return;
+
   isSyncing = true;
   try {
-    const pending = await getUnsynced();
-    if (!pending.length) return;
-
     const res = await fetch('/api/sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -57,9 +57,9 @@ async function syncPending() {
     });
 
     if (res.ok) {
-      await markSynced(pending.map(o => o.id));
+      markSynced(pending.map(o => o.id));
     }
-  } catch (e) {
+  } catch {
     // Offline nebo server nedostupný — zkusíme příště
   } finally {
     isSyncing = false;
@@ -67,11 +67,11 @@ async function syncPending() {
   }
 }
 
-async function updateSyncBadge() {
-  const count = await unsyncedCount();
+function updateSyncBadge() {
+  const count = unsyncedCount();
   const badge = document.getElementById('syncBadge');
   if (!badge) return;
-  badge.textContent = count > 0 ? `${count} čeká` : '';
+  badge.textContent   = count > 0 ? `${count} čeká` : '';
   badge.style.display = count > 0 ? 'inline-block' : 'none';
 }
 
@@ -109,7 +109,7 @@ async function pay(method) {
   };
 
   // 1. Uložit lokálně (vždy uspěje)
-  await saveOrder(newOrder);
+  saveOrder(newOrder);
   updateSyncBadge();
 
   // 2. Zkusit ihned synchronizovat na server
