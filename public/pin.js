@@ -12,10 +12,10 @@ export function authenticate() {
   sessionStorage.setItem(SESSION_KEY, '1');
 }
 
-export function askPin() {
+export function askPin({ force = false } = {}) {
   return new Promise((resolve, reject) => {
-    // Pokud již autentizován v této session, přeskočit
-    if (isAuthenticated()) { resolve(); return; }
+    // Pokud již autentizován v této session, přeskočit (pokud není force)
+    if (!force && isAuthenticated()) { resolve(); return; }
 
     const overlay = document.createElement('div');
     overlay.className = 'pin-overlay';

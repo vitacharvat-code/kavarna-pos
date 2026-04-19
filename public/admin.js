@@ -3,7 +3,7 @@ import { askPin } from './pin.js';
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
   try {
-    await askPin();
+    await askPin({ force: true });
   } catch {
     // PIN zrušen — vrátit zpět na pokladnu
     window.location.href = '/';
