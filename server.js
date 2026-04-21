@@ -153,6 +153,61 @@ app.get('/api/backup', async (req, res) => {
   }
 });
 
+// ── Ceník (Excel) ─────────────────────────────────────────────────────────────
+app.get('/api/pricelist', async (req, res) => {
+  try {
+    const ExcelJS  = require('exceljs');
+    const items    = await db.getItems();
+    const workbook = new ExcelJS.Workbook();
+    const sheet    = workbook.addWorksheet('Ceník');
+
+    const CAT_LABELS = { kava: 'Káva', napoje: 'Nápoje', jidlo: 'Jídlo', ostatni: 'Ostatní' };
+
+    sheet.columns = [
+      { header: 'Kategorie', key: 'category', width: 14 },
+      { header: 'Název',     key: 'name',     width: 30 },
+      { header: 'Cena (Kč)', key: 'price',    width: 14 },
+    ];
+
+    // Záhlaví
+    sheet.getRow(1).eachCell(cell => {
+      cell.font      = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF7C4F2A' } };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    });
+    sheet.getRow(1).height = 24;
+
+    // Barvy kategorií
+    const CAT_COLORS = { kava: 'FFFFF8F0', napoje: 'FFF0F7FF', jidlo: 'FFF3FAF3', ostatni: 'FFFAFAFA' };
+
+    items.forEach(item => {
+      const row = sheet.addRow({
+        category: CAT_LABELS[item.category] ?? item.category,
+        name:     item.name,
+        price:    Number(item.price),
+      });
+      const bg = CAT_COLORS[item.category] ?? 'FFFFFFFF';
+      row.eachCell(cell => {
+        cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+        cell.alignment = { vertical: 'middle' };
+      });
+      row.getCell('price').numFmt    = '#,##0.00';
+      row.getCell('price').alignment = { horizontal: 'right' };
+    });
+
+    sheet.views = [{ state: 'frozen', ySplit: 1 }];
+
+    const date = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="kavarna-cenik-${date}.xlsx"`);
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => res.json({ ok: true, time: new Date().toISOString() }));
 
