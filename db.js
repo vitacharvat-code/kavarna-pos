@@ -213,7 +213,7 @@ async function getSummary(date) {
 async function getBackupData() {
   const { rows } = await pool.query(`
     SELECT
-      ROW_NUMBER() OVER (ORDER BY o.created_at ASC, o.id ASC) AS order_number,
+      DENSE_RANK() OVER (ORDER BY o.created_at ASC, o.id ASC) AS order_number,
       o.created_at,
       o.payment_method,
       o.total,
