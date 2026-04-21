@@ -67,6 +67,7 @@ function renderOrders(orders) {
     row.className = 'order-summary-row';
     row.innerHTML = `
       <div class="osr-main" data-target="${detailId}">
+        <span class="osr-num">#${order.order_number}</span>
         <span class="osr-time">${time}</span>
         <span class="osr-items">${itemCount} ${itemCount === 1 ? 'položka' : itemCount < 5 ? 'položky' : 'položek'}</span>
         <span class="osr-pay">${payIcon} ${payLabel}</span>

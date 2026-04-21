@@ -187,7 +187,9 @@ async function getSummary(date) {
   `, [date]);
 
   const { rows: orders } = await pool.query(`
-    SELECT * FROM orders WHERE created_at::date=$1 ORDER BY created_at DESC
+    SELECT *,
+      ROW_NUMBER() OVER (ORDER BY created_at ASC, id ASC) AS order_number
+    FROM orders WHERE created_at::date=$1 ORDER BY created_at DESC
   `, [date]);
 
   // Přidat položky ke každé objednávce

@@ -434,7 +434,8 @@ html, body {
   -webkit-user-select: none;
 }
 .osr-main:active  { background: var(--surface2); }
-.osr-time         { font-size: 15px; font-weight: 700; min-width: 44px; color: var(--text-muted); }
+.osr-num          { font-size: 13px; font-weight: 700; color: var(--accent); min-width: 32px; }
+.osr-time         { font-size: 15px; font-weight: 600; min-width: 44px; color: var(--text-muted); }
 .osr-items        { flex: 1; font-size: 14px; color: var(--text-muted); }
 .osr-pay          { font-size: 13px; color: var(--text-muted); white-space: nowrap; }
 .osr-total        { font-size: 17px; font-weight: 800; color: var(--accent); white-space: nowrap; }
