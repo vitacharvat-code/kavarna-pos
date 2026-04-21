@@ -73,38 +73,82 @@ app.get('/api/dates', async (req, res) => {
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── Záloha ────────────────────────────────────────────────────────────────────
+// ── Záloha (Excel) ────────────────────────────────────────────────────────────
 app.get('/api/backup', async (req, res) => {
   try {
-    const rows = await db.getBackupData();
+    const ExcelJS  = require('exceljs');
+    const rows     = await db.getBackupData();
+    const workbook = new ExcelJS.Workbook();
+    const sheet    = workbook.addWorksheet('Objednávky');
 
-    // Celkem a metadata zobrazit jen na prvním řádku každé objednávky
-    const seen = new Set();
-    const lines = [
-      'Č. objednávky;Datum;Čas;Způsob platby;Položka;Množství;Cena za kus (Kč);Mezisoučet (Kč);Celkem objednávka (Kč)',
-      ...rows.map(r => {
-        const dt       = new Date(r.created_at);
-        const isFirst  = !seen.has(r.order_number);
-        if (isFirst) seen.add(r.order_number);
-        return [
-          r.order_number,
-          isFirst ? dt.toLocaleDateString('cs-CZ') : '',
-          isFirst ? dt.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }) : '',
-          isFirst ? (r.payment_method === 'hotovost' ? 'Hotovost' : 'Na účet') : '',
-          r.item_name,
-          r.quantity,
-          r.item_price.toFixed(2).replace('.', ','),
-          r.subtotal.toFixed(2).replace('.', ','),
-          isFirst ? r.total.toFixed(2).replace('.', ',') : '',
-        ].join(';');
-      })
+    // ── Sloupce ──────────────────────────────────────────────────────────────
+    sheet.columns = [
+      { header: 'Č. objednávky', key: 'order_number', width: 16 },
+      { header: 'Datum',         key: 'date',         width: 14 },
+      { header: 'Čas',           key: 'time',         width: 8  },
+      { header: 'Způsob platby', key: 'payment',      width: 16 },
+      { header: 'Položka',       key: 'item',         width: 26 },
+      { header: 'Množství',      key: 'quantity',     width: 10 },
+      { header: 'Cena/ks (Kč)',  key: 'price',        width: 14 },
+      { header: 'Mezisoučet (Kč)', key: 'subtotal',   width: 16 },
+      { header: 'Celkem obj. (Kč)', key: 'total',     width: 16 },
     ];
 
+    // ── Styl záhlaví ─────────────────────────────────────────────────────────
+    sheet.getRow(1).eachCell(cell => {
+      cell.font      = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF7C4F2A' } };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      cell.border    = { bottom: { style: 'thin', color: { argb: 'FFCCCCCC' } } };
+    });
+    sheet.getRow(1).height = 24;
+
+    // ── Data ──────────────────────────────────────────────────────────────────
+    const lightBrown = 'FFFFF8F0'; // světlé řádky pro liché objednávky
+    const white      = 'FFFFFFFF';
+
+    rows.forEach(r => {
+      const dt  = new Date(r.created_at);
+      const row = sheet.addRow({
+        order_number: Number(r.order_number),
+        date:    dt.toLocaleDateString('cs-CZ'),
+        time:    dt.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }),
+        payment: r.payment_method === 'hotovost' ? 'Hotovost' : 'Na účet',
+        item:    r.item_name,
+        quantity: Number(r.quantity),
+        price:   Number(r.item_price),
+        subtotal: Number(r.subtotal),
+        total:   Number(r.total),
+      });
+
+      // Střídání barev řádků podle čísla objednávky
+      const bg = Number(r.order_number) % 2 === 0 ? white : lightBrown;
+      row.eachCell(cell => {
+        cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+        cell.alignment = { vertical: 'middle' };
+      });
+
+      // Čísla zarovnat doprava
+      ['quantity', 'price', 'subtotal', 'total'].forEach(key => {
+        row.getCell(key).alignment = { horizontal: 'right' };
+        row.getCell(key).numFmt = '#,##0.00';
+      });
+      row.getCell('order_number').alignment = { horizontal: 'center' };
+      row.getCell('time').alignment          = { horizontal: 'center' };
+      row.getCell('payment').alignment       = { horizontal: 'center' };
+    });
+
+    // ── Zmrazit záhlaví ───────────────────────────────────────────────────────
+    sheet.views = [{ state: 'frozen', ySplit: 1 }];
+
+    // ── Odeslat ───────────────────────────────────────────────────────────────
     const date = new Date().toISOString().slice(0, 10);
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="kavarna-zaloha-${date}.csv"`);
-    res.send('\uFEFF' + lines.join('\r\n')); // BOM pro správné zobrazení v Excelu
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="kavarna-zaloha-${date}.xlsx"`);
+    await workbook.xlsx.write(res);
+    res.end();
   } catch (e) {
+    console.error(e);
     res.status(500).json({ error: e.message });
   }
 });
