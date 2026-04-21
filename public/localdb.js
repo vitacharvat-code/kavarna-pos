@@ -31,3 +31,7 @@ export function getUnsynced() {
 export function unsyncedCount() {
   return getUnsynced().length;
 }
+
+export function removeOrder(id) {
+  writeQueue(readQueue().filter(o => o.id !== id));
+}

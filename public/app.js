@@ -1,4 +1,4 @@
-import { saveOrder, markSynced, getUnsynced, unsyncedCount } from './localdb.js';
+import { saveOrder, markSynced, getUnsynced, unsyncedCount, removeOrder } from './localdb.js';
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let items          = [];
@@ -21,6 +21,7 @@ async function init() {
   document.getElementById('btnCash').addEventListener('click', () => pay('hotovost'));
   document.getElementById('btnCard').addEventListener('click', () => pay('ucet'));
   document.getElementById('modalOk').addEventListener('click', closeModal);
+  document.getElementById('modalStorno').addEventListener('click', stornoOrder);
 }
 
 // ── Service Worker ────────────────────────────────────────────────────────────
@@ -117,7 +118,7 @@ async function pay(method) {
 
   const icon  = method === 'hotovost' ? '💵' : '🏦';
   const label = method === 'hotovost' ? 'Hotovost' : 'Na účet';
-  showModal(icon, 'Platba přijata', `${label} — ${fmt(newOrder.total)}`);
+  showModal(icon, 'Platba přijata', `${label} — ${fmt(newOrder.total)}`, newOrder.id);
   clearOrder();
 }
 
@@ -223,12 +224,31 @@ function clearOrder() { order = []; renderOrder(); }
 // ── Utils ─────────────────────────────────────────────────────────────────────
 function fmt(n) { return Number(n).toLocaleString('cs-CZ') + ' Kč'; }
 
-function showModal(icon, title, text) {
+let _lastOrderId = null;
+
+function showModal(icon, title, text, orderId = null) {
+  _lastOrderId = orderId;
   document.getElementById('modalIcon').textContent  = icon;
   document.getElementById('modalTitle').textContent = title;
   document.getElementById('modalText').textContent  = text;
+  document.getElementById('modalStorno').style.display = orderId ? 'block' : 'none';
   document.getElementById('modalOverlay').classList.add('show');
 }
-function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+function closeModal() {
+  _lastOrderId = null;
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+async function stornoOrder() {
+  if (!_lastOrderId) return;
+  const id = _lastOrderId;
+  closeModal();
+  // Smazat z lokální fronty
+  removeOrder(id);
+  updateSyncBadge();
+  // Smazat ze serveru (pokud už bylo odesláno)
+  try { await fetch(`/api/orders/${id}`, { method: 'DELETE' }); } catch { /* offline — nevadí */ }
+}
 
 init();

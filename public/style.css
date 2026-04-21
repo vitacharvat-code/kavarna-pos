@@ -353,16 +353,30 @@ html, body {
 .modal-icon { font-size: 48px; margin-bottom: 12px; }
 .modal h3   { font-size: 22px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
 .modal p    { color: var(--text-muted); font-size: 15px; margin-bottom: 24px; }
+.modal-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
 .btn-modal-ok {
   background: var(--cash);
   color: #fff;
   border: none;
   border-radius: 12px;
-  padding: 14px 40px;
+  padding: 14px;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  width: 100%;
+}
+.btn-modal-storno {
+  background: var(--danger-light);
+  color: var(--danger);
+  border: 1.5px solid var(--danger);
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 /* ── Dashboard ────────────────────────────────────────────────────────────── */
