@@ -213,7 +213,7 @@ async function getSummary(date) {
 async function getBackupData() {
   const { rows } = await pool.query(`
     SELECT
-      DENSE_RANK() OVER (ORDER BY o.created_at ASC, o.id ASC) AS order_number,
+      o.id        AS order_id,
       o.created_at,
       o.payment_method,
       o.total,
@@ -225,6 +225,15 @@ async function getBackupData() {
     JOIN order_items oi ON oi.order_id = o.id
     ORDER BY o.created_at ASC, o.id ASC, oi.id ASC
   `);
+
+  // Přiřadit čísla objednávek v JS — každá unikátní order_id dostane pořadové číslo
+  const numMap = new Map();
+  let next = 1;
+  for (const row of rows) {
+    if (!numMap.has(row.order_id)) numMap.set(row.order_id, next++);
+    row.order_number = numMap.get(row.order_id);
+  }
+
   return rows;
 }
 
