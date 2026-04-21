@@ -30,6 +30,13 @@ app.put('/api/items/:id', async (req, res) => {
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.post('/api/items/reorder', async (req, res) => {
+  const { ids } = req.body;
+  if (!Array.isArray(ids)) return res.status(400).json({ error: 'Očekáváno pole ids' });
+  try { await db.reorderItems(ids); res.json({ ok: true }); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.post('/api/items/:id/move', async (req, res) => {
   const { direction } = req.body;
   if (!['up', 'down'].includes(direction)) return res.status(400).json({ error: 'Invalid direction' });

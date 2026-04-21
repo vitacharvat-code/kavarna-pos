@@ -40,9 +40,14 @@
     <div id="formMsg" style="margin-top:10px;font-size:14px;color:#4caf50;display:none;"></div>
   </div>
 
-  <div class="section-title">Aktuální menu</div>
-  <div class="admin-items-list" id="itemsList">
+  <div class="section-title">Aktuální menu <span class="drag-hint">— přetáhni pro změnu pořadí</span></div>
+  <div id="itemsList">
     <div class="no-data">Načítám...</div>
+  </div>
+
+  <div class="save-order-bar" id="saveOrderBar" style="display:none">
+    <span class="save-order-hint">Pořadí bylo změněno</span>
+    <button class="btn-save-order" id="btnSaveOrder">Uložit pořadí</button>
   </div>
 </div>
 
@@ -61,6 +66,7 @@
   </a>
 </nav>
 
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script type="module" src="admin.js"></script>
 </body>
 </html>

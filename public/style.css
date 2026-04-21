@@ -560,6 +560,7 @@ html, body {
 .btn-add:active { background: var(--accent-dark); }
 
 .admin-items-list { display: flex; flex-direction: column; gap: 8px; }
+.sortable-group   { display: flex; flex-direction: column; gap: 8px; }
 
 .admin-item-row {
   background: var(--surface);
@@ -576,6 +577,54 @@ html, body {
 .admin-item-row[data-cat="kava"]   { border-left: 4px solid var(--kava-border); }
 .admin-item-row[data-cat="napoje"] { border-left: 4px solid var(--napoje-border); }
 .admin-item-row[data-cat="jidlo"]  { border-left: 4px solid var(--jidlo-border); }
+
+.drag-handle {
+  font-size: 18px;
+  color: var(--text-muted);
+  cursor: grab;
+  padding: 0 4px;
+  touch-action: none;
+  flex-shrink: 0;
+}
+.drag-handle:active { cursor: grabbing; }
+.drag-ghost {
+  opacity: 0.4;
+  background: var(--accent-light) !important;
+  border: 2px dashed var(--accent) !important;
+}
+.drag-hint {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.save-order-bar {
+  position: sticky;
+  bottom: calc(var(--nav-h) + 12px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-top: 16px;
+  box-shadow: 0 4px 16px rgba(124,79,42,0.15);
+  gap: 12px;
+}
+.save-order-hint { font-size: 14px; color: var(--accent); font-weight: 600; }
+.btn-save-order {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 24px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-save-order:active { background: var(--accent-dark); }
 
 .ai-fields {
   flex: 1;

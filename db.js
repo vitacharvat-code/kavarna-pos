@@ -90,6 +90,22 @@ async function getItems() {
   return rows;
 }
 
+async function reorderItems(orderedIds) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    for (let i = 0; i < orderedIds.length; i++) {
+      await client.query('UPDATE items SET sort_order=$1 WHERE id=$2', [i + 1, orderedIds[i]]);
+    }
+    await client.query('COMMIT');
+  } catch (e) {
+    await client.query('ROLLBACK');
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
 async function moveItem(id, direction) {
   // Najdi aktuální položku
   const { rows: [item] } = await pool.query('SELECT * FROM items WHERE id=$1', [id]);
@@ -250,4 +266,4 @@ async function getAvailableDates() {
   return rows.map(r => r.date);
 }
 
-module.exports = { init, getItems, addItem, updateItem, deleteItem, moveItem, upsertOrders, deleteOrder, getBackupData, getSummary, getAvailableDates };
+module.exports = { init, getItems, addItem, updateItem, deleteItem, moveItem, reorderItems, upsertOrders, deleteOrder, getBackupData, getSummary, getAvailableDates };
