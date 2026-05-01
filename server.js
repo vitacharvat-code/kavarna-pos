@@ -70,7 +70,7 @@ app.post('/api/sync', async (req, res) => {
 // ── Denní přehled ─────────────────────────────────────────────────────────────
 
 app.get('/api/summary', async (req, res) => {
-  const date = req.query.date || new Date().toISOString().slice(0, 10);
+  const date = req.query.date || new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Prague' });
   try { res.json(await db.getSummary(date)); }
   catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -114,12 +114,13 @@ app.get('/api/backup', async (req, res) => {
     const lightBrown = 'FFFFF8F0'; // světlé řádky pro liché objednávky
     const white      = 'FFFFFFFF';
 
+    const TZ = { timeZone: 'Europe/Prague' };
     rows.forEach(r => {
       const dt  = new Date(r.created_at);
       const row = sheet.addRow({
         order_number: Number(r.order_number),
-        date:    dt.toLocaleDateString('cs-CZ'),
-        time:    dt.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' }),
+        date:    dt.toLocaleDateString('cs-CZ', TZ),
+        time:    dt.toLocaleTimeString('cs-CZ', { ...TZ, hour: '2-digit', minute: '2-digit' }),
         payment: r.payment_method === 'hotovost' ? 'Hotovost' : 'Na účet',
         item:    r.item_name,
         quantity: Number(r.quantity),

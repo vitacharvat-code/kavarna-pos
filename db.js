@@ -187,7 +187,7 @@ async function getSummary(date) {
       COALESCE(SUM(CASE WHEN payment_method='hotovost' THEN total ELSE 0 END), 0) AS cash,
       COALESCE(SUM(CASE WHEN payment_method='ucet'     THEN total ELSE 0 END), 0) AS card
     FROM orders
-    WHERE created_at::date = $1
+    WHERE (created_at AT TIME ZONE 'Europe/Prague')::date = $1
   `, [date]);
 
   const { rows: itemStats } = await pool.query(`
